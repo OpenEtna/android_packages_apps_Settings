@@ -256,8 +256,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="DeviceInfoSettings" android:label="@string/device_info_settings"
-                >
+        <activity android:name="DeviceInfoSettings"
+                android:label="@string/device_info_settings"
+                android:process="com.android.phone" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
