@@ -1213,6 +1213,9 @@
     <!-- About phone screen,  setting option name-->
     <string name="mod_version">Mod version</string>
     <string name="mod_version_default">Unknown</string>
+    <string name="modem_version">Modem version</string>
+    <string name="factory_version">Factory version</string>
+    <string name="hw_version">HW version</string>
 
     <!-- About phone screen, show when a value of some status item is unavailable. -->
     <string name="device_info_not_available">Not available</string>

@@ -28,6 +28,11 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.util.Config;
 import android.util.Log;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneFactory;
+import android.os.Message;
+import android.os.AsyncResult;
+import android.os.Handler;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -49,13 +54,41 @@ public class DeviceInfoSettings extends PreferenceActivity {
     private static final String KEY_COPYRIGHT = "copyright";
     private static final String KEY_SYSTEM_UPDATE_SETTINGS = "system_update_settings";
     private static final String PROPERTY_URL_SAFETYLEGAL = "ro.url.safetylegal";
-    
+    private Phone phone = null;
+
+    private static final int EVENT_GET_MODEM_VERSION = 1;
+    private static final int EVENT_GET_FACTORY_VERSION = 2;
+    private static final int EVENT_GET_HW_VERSION = 3;
+
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            AsyncResult ar = (AsyncResult) msg.obj;
+            switch (msg.what) {
+            case EVENT_GET_MODEM_VERSION:
+                setStringSummary("device_modem_version", (String)ar.result);
+                break;
+            case EVENT_GET_FACTORY_VERSION:
+                setStringSummary("device_factory_version", (String)ar.result);
+                break;
+            case EVENT_GET_HW_VERSION:
+                setStringSummary("device_hw_version", (String)ar.result);
+                break;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        
+
+        phone = PhoneFactory.getDefaultPhone();
+
+        phone.getModemVersion(mHandler.obtainMessage(EVENT_GET_MODEM_VERSION));
+        phone.getFactoryVersion(mHandler.obtainMessage(EVENT_GET_FACTORY_VERSION));
+        phone.getHWVersion(mHandler.obtainMessage(EVENT_GET_HW_VERSION));
+
         addPreferencesFromResource(R.xml.device_info_settings);
-       
+
         setStringSummary("firmware_version", Build.VERSION.RELEASE);
         setValueSummary("baseband_version", "gsm.version.baseband");
         setStringSummary("device_model", Build.MODEL);
@@ -71,7 +104,7 @@ public class DeviceInfoSettings extends PreferenceActivity {
          * Settings is a generic app and should not contain any device-specific
          * info.
          */
-        
+
         // These are contained in the "container" preference group
         PreferenceGroup parentPreference = (PreferenceGroup) findPreference(KEY_CONTAINER);
         Utils.updatePreferenceToSpecificActivityOrRemove(this, parentPreference, KEY_TERMS,
@@ -82,7 +115,7 @@ public class DeviceInfoSettings extends PreferenceActivity {
                 Utils.UPDATE_PREFERENCE_FLAG_SET_TITLE_TO_MATCHING_ACTIVITY);
         Utils.updatePreferenceToSpecificActivityOrRemove(this, parentPreference, KEY_TEAM,
                 Utils.UPDATE_PREFERENCE_FLAG_SET_TITLE_TO_MATCHING_ACTIVITY);
-        
+
         // These are contained by the root preference screen
         parentPreference = getPreferenceScreen();
         Utils.updatePreferenceToSpecificActivityOrRemove(this, parentPreference,
@@ -114,11 +147,11 @@ public class DeviceInfoSettings extends PreferenceActivity {
                 getResources().getString(R.string.device_info_default));
         }
     }
-    
+
     private void setValueSummary(String preference, String property) {
         try {
             findPreference(preference).setSummary(
-                    SystemProperties.get(property, 
+                    SystemProperties.get(property,
                             getResources().getString(R.string.device_info_default)));
         } catch (RuntimeException e) {
 
@@ -161,7 +194,7 @@ public class DeviceInfoSettings extends PreferenceActivity {
                         m.group(2)).append(" ").append(m.group(3)).append("\n")
                         .append(m.group(4))).toString();
             }
-        } catch (IOException e) {  
+        } catch (IOException e) {
             Log.e(TAG,
                 "IO Exception when getting kernel version for Device Info screen",
                 e);
