@@ -1838,6 +1838,7 @@ found in the list of installed applications.</string>
     <string name="auto_punctuate">Auto-punctuate</string>
     <!-- On Text & language settings screen, category for physical keyboard text entry options. -->
     <string name="hardkeyboard_category">Physical keyboard settings</string>
+    <string name="keyboard_layout">Keyboard layout</string>
     <!-- On Text & language settings screen, setting summary for the Auto-punctuate setting. -->
     <string name="auto_punctuate_summary">Press Space key twice to insert \u0022.\u0022</string>
     <!-- On Security & location settings screen, setting check box name. Title of the checkbox to set whether password edit fields will show the most recent character typed and then hide it, or just hide it right away.  By hide, I mean mask it out. -->
