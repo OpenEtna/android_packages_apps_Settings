@@ -1084,6 +1084,13 @@
     <string name="notification_blink_title">Blink notification light</string>
     <!-- Display settings screen, notification light repeat blinking summary -->
     <string name="notification_blink_summary">Blink the green notifications repeatedly</string>
+
+    <!-- RAB: add enabled option -->
+    <!-- Display settings screen, notification light enabled title -->
+    <string name="notification_enabled_title">Enable notification light</string>
+    <!-- Display settings screen, notification light enabled summary -->
+    <string name="notification_enabled_summary">Use back &amp; home buttons as improvised notification light</string>
+
     <!-- Display settings screen, notification light always on title -->
     <string name="notification_always_on_title">Always enable notification light</string>
     <!-- Display settings screen, notification light always on summary -->

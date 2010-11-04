@@ -25,6 +25,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -53,6 +54,8 @@ public class SoundSettings extends PreferenceActivity implements
     private static final String KEY_EMERGENCY_TONE = "emergency_tone";
     private static final String KEY_SOUND_SETTINGS = "sound_settings";
     private static final String KEY_NOTIFICATION_PULSE = "notification_pulse";
+    // RAB: added enabled option
+    private static final String KEY_NOTIFICATION_ENABLED = "notification_enabled";
     private static final String KEY_NOTIFICATION_BLINK = "notification_blink";
     private static final String KEY_NOTIFICATION_ALWAYS_ON = "notification_always_on";
     private static final String KEY_NOTIFICATION_CHARGING = "notification_charging";
@@ -77,6 +80,8 @@ public class SoundSettings extends PreferenceActivity implements
     private CheckBoxPreference mSoundEffects;
     private CheckBoxPreference mHapticFeedback;
     private CheckBoxPreference mNotificationPulse;
+    // RAB: added enabled option
+    private CheckBoxPreference mNotificationEnabled;
     private CheckBoxPreference mNotificationBlink;
     private CheckBoxPreference mNotificationAlwaysOn;
     private CheckBoxPreference mNotificationCharging;
@@ -143,6 +148,9 @@ public class SoundSettings extends PreferenceActivity implements
         mSoundSettings = (PreferenceGroup) findPreference(KEY_SOUND_SETTINGS);
         mNotificationPulse = (CheckBoxPreference)
                 mSoundSettings.findPreference(KEY_NOTIFICATION_PULSE);
+        // RAB: added enabled option
+        mNotificationEnabled = (CheckBoxPreference)
+                mSoundSettings.findPreference(KEY_NOTIFICATION_ENABLED);
         mNotificationBlink = (CheckBoxPreference)
                 mSoundSettings.findPreference(KEY_NOTIFICATION_BLINK);
         mNotificationAlwaysOn = (CheckBoxPreference)
@@ -156,19 +164,30 @@ public class SoundSettings extends PreferenceActivity implements
         if (amberGreenLight) {
             mSoundSettings.removePreference(mNotificationPulse);
 
-            mNotificationBlink.setChecked(Settings.System.getInt(resolver,
-                    Settings.System.NOTIFICATION_LIGHT_BLINK, 1) == 1);
-            mNotificationBlink.setOnPreferenceChangeListener(this);
+            // RAB: added enabled option
+            mNotificationEnabled.setChecked(
+                SystemProperties.get("persist.sys.notifyled", "0").equals("1"));
+            mNotificationEnabled.setOnPreferenceChangeListener(this);
+
+            // RAB: don't offer blinking, we can't do it
+            mSoundSettings.removePreference(mNotificationBlink);
+            //mNotificationBlink.setChecked(Settings.System.getInt(resolver,
+            //        Settings.System.NOTIFICATION_LIGHT_BLINK, 1) == 1);
+            //mNotificationBlink.setOnPreferenceChangeListener(this);
 
             mNotificationAlwaysOn.setChecked(Settings.System.getInt(resolver,
                     Settings.System.NOTIFICATION_LIGHT_ALWAYS_ON, 1) == 1);
             mNotificationAlwaysOn.setOnPreferenceChangeListener(this);
 
-            mNotificationCharging.setChecked(Settings.System.getInt(resolver,
-                    Settings.System.NOTIFICATION_LIGHT_CHARGING, 1) == 1);
-            mNotificationCharging.setOnPreferenceChangeListener(this);
+            // RAB: don't offer a charging light, since we don't have one
+            mSoundSettings.removePreference(mNotificationCharging);
+            //mNotificationCharging.setChecked(Settings.System.getInt(resolver,
+            //        Settings.System.NOTIFICATION_LIGHT_CHARGING, 1) == 1);
+            //mNotificationCharging.setOnPreferenceChangeListener(this);
 
         } else {
+            // RAB: added enabled option
+            mSoundSettings.removePreference(mNotificationEnabled);
             mSoundSettings.removePreference(mNotificationBlink);
             mSoundSettings.removePreference(mNotificationAlwaysOn);
             mSoundSettings.removePreference(mNotificationCharging);
@@ -347,6 +366,11 @@ public class SoundSettings extends PreferenceActivity implements
             boolean value = mNotificationPulse.isChecked();
             Settings.System.putInt(getContentResolver(),
                     Settings.System.NOTIFICATION_LIGHT_PULSE, value ? 1 : 0);
+
+        // RAB: added enabled option
+        } else if (preference == mNotificationEnabled) {
+            boolean value = mNotificationEnabled.isChecked();
+            SystemProperties.set("persist.sys.notifyled", value ? "1" : "0");
 
         } else if (preference == mNotificationBlink) {
             boolean value = mNotificationBlink.isChecked();
