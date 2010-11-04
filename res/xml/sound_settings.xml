@@ -82,6 +82,13 @@
             android:summary="@string/notification_pulse_summary"
             android:persistent="false" />
 
+    <!-- RAB: added enabled option -->
+    <CheckBoxPreference
+            android:key="notification_enabled"
+            android:title="@string/notification_enabled_title"
+            android:summary="@string/notification_enabled_summary"
+            android:persistent="false" />
+
     <CheckBoxPreference
             android:key="notification_blink"
             android:title="@string/notification_blink_title"
