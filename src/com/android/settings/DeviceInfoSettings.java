@@ -31,6 +31,11 @@ import android.preference.PreferenceScreen;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MotionEvent;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneFactory;
+import android.os.Message;
+import android.os.AsyncResult;
+import android.os.Handler;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -55,6 +60,29 @@ public class DeviceInfoSettings extends PreferenceActivity {
 
     long[] mHits = new long[3];
 
+    private Phone phone = null;
+
+    private static final int EVENT_GET_MODEM_VERSION = 1;
+    private static final int EVENT_GET_FACTORY_VERSION = 2;
+    private static final int EVENT_GET_HW_VERSION = 3;
+
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            AsyncResult ar = (AsyncResult) msg.obj;
+            switch (msg.what) {
+            case EVENT_GET_MODEM_VERSION:
+                setStringSummary("device_modem_version", (String)ar.result);
+                break;
+            case EVENT_GET_FACTORY_VERSION:
+                setStringSummary("device_factory_version", (String)ar.result);
+                break;
+            case EVENT_GET_HW_VERSION:
+                setStringSummary("device_hw_version", (String)ar.result);
+                break;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -74,6 +102,15 @@ public class DeviceInfoSettings extends PreferenceActivity {
 
         setStringSummary("device_cpu", getCPUInfo());
         setStringSummary("device_memory", getMemAvail().toString()+" MB / "+getMemTotal().toString()+" MB");
+        
+        phone = PhoneFactory.getDefaultPhone();
+
+        phone.getModemVersion(mHandler.obtainMessage(EVENT_GET_MODEM_VERSION));
+        phone.getFactoryVersion(mHandler.obtainMessage(EVENT_GET_FACTORY_VERSION));
+        phone.getHWVersion(mHandler.obtainMessage(EVENT_GET_HW_VERSION));
+
+        addPreferencesFromResource(R.xml.device_info_settings);
+
         setStringSummary("firmware_version", Build.VERSION.RELEASE);
         findPreference("firmware_version").setEnabled(true);
         setValueSummary("baseband_version", "gsm.version.baseband");
