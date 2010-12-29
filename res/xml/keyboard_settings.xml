@@ -17,6 +17,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
 
+    <ListPreference
+            android:key="keyboard_layout"
+            android:title="@string/keyboard_layout"
+            android:persistent="false"
+            android:entries="@array/keyboard_layout_entries"
+            android:entryValues="@array/keyboard_layout_values"
+            />
+
     <CheckBoxPreference
             android:key="auto_replace"
             android:title="@string/auto_replace"

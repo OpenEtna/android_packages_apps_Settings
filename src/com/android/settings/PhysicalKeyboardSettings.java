@@ -23,9 +23,18 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.provider.Settings.System;
+import android.util.Log;
+import android.preference.ListPreference;
+import android.os.SystemProperties;
+import android.widget.Toast;
 
-public class PhysicalKeyboardSettings extends PreferenceActivity {
+public class PhysicalKeyboardSettings extends PreferenceActivity implements
+        Preference.OnPreferenceChangeListener {
     
+    private String TAG = "PhysicalKeyboardSettings";
+    private String KL_PROP = "persist.sys.kl.eve_qwerty";
+    private ListPreference mKeyboardLayout;
+
     private final String[] mSettingsUiKey = {
             "auto_caps",
             "auto_replace",
@@ -46,11 +55,20 @@ public class PhysicalKeyboardSettings extends PreferenceActivity {
             1,
     };
 
+    public void updateState() {
+        String prop = SystemProperties.get(KL_PROP,getResources().getStringArray(R.array.keyboard_layout_values)[0]);
+        Log.i(TAG,KL_PROP + " is " + prop);
+        mKeyboardLayout.setValue(prop);
+        mKeyboardLayout.setSummary(mKeyboardLayout.getEntry());
+    }
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
         addPreferencesFromResource(R.xml.keyboard_settings);
+        mKeyboardLayout = (ListPreference) findPreference("keyboard_layout");
+        mKeyboardLayout.setOnPreferenceChangeListener(this);
     }
     
     @Override
@@ -62,6 +80,7 @@ public class PhysicalKeyboardSettings extends PreferenceActivity {
             pref.setChecked(System.getInt(resolver, mSettingsSystemId[i],
                                           mSettingsDefault[i]) > 0);
         }
+        updateState();
     }
 
 
@@ -78,6 +97,16 @@ public class PhysicalKeyboardSettings extends PreferenceActivity {
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
+    }
+
+    public boolean onPreferenceChange(Preference preference, Object objValue) {
+        if (preference == mKeyboardLayout) {
+            Log.i(TAG, "Setting " + KL_PROP + " to " + objValue.toString());
+            SystemProperties.set(KL_PROP, objValue.toString());
+            Toast.makeText(this,"You must reboot your phone for the changes to take effect", Toast.LENGTH_LONG).show();
+            updateState();
+        }
+        return true;
     }
 
 }

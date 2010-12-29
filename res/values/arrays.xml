@@ -449,4 +449,15 @@
         <item>Transparent</item>
     </string-array>
 
+    <string-array name="keyboard_layout_entries">
+        <item>QWERTY</item>
+        <item>QWERTZ</item>
+        <item>AZERTY</item>
+    </string-array>
+    <!-- The keylayout file is built as /system/usr/keylayout/%s.kl -->
+    <string-array name="keyboard_layout_values">
+        <item>eve_qwerty</item>
+        <item>eve_qwerty-qwertz</item>
+        <item>eve_qwerty-azerty</item>
+    </string-array>
 </resources>
